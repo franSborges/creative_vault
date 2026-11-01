@@ -18,4 +18,4 @@ export interface Reference {
     updatedAt: Date;
 }
 
-export type CreatedReference = Omit<Reference, "id" | "createdAt" | "updatedAt">;
+export type CreateReferenceInput = Omit<Reference, "id" | "createdAt" | "updatedAt">;
