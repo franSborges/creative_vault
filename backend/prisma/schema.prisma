@@ -14,6 +14,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+enum VaultItemType {
+  BOOK
+  MOVIE
+  IMAGE
+  QUOTE
+  LINK
+}
+
+
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   name         String
@@ -27,10 +37,85 @@ model User {
 
 
 model Library {
-  id           String     @id
-  ownerId      String     @unique
+  id           String     @id @default(uuid()) @db.Uuid
+  ownerId      String     @unique  @db.Uuid
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
   owner        User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  vaultItems   VaultItem[]
+
+}
+
+
+model VaultItem {
+  id         String       @id @default(uuid()) @db.Uuid
+  libraryId  String       @db.Uuid
+  type       VaultItemType
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  library    Library     @relation(fields: [libraryId], references: [id], onDelete: Cascade)
+  book       Book?
+  movie      Movie?
+}
+
+
+model Book {
+  id               String      @id @default(uuid()) @db.Uuid
+  vaultItemId      String      @unique  @db.Uuid
+  title            String
+  author           String?
+  isbn             String? 
+  publicationYear  Int?
+
+  vaultItem        VaultItem   @relation(fields: [vaultItemId], references: [id], onDelete: Cascade)     
+}
+
+
+model Movie {
+  id               String    @id       @default(uuid()) @db.Uuid
+  vaultItemId      String    @unique   @db.Uuid
+  title            String
+  originalTitle    String?
+  director         String?
+  releaseYear      Int?
+
+  vaultItem        VaultItem  @relation(fields: [vaultItemId], references: [id], onDelete: Cascade)
+}
+
+
+model Image {
+  id    String   @id @default(uuid()) @db.Uuid
+  vaultItemId  String  @unique @db.Uuid
+  title        String?
+  description  String?
+  storageKey   String?
+  externalUrl  String?
+  sourceUrl    String?
+
+  vaultItem    VaultItem @relation(fields: [vaultItemId], references: [id], onDelete: Cascade)
+}
+
+
+model Quote {
+  id            String   @id @default(uuid()) @db.Uuid
+  vaultItemId   String   @unique  @db.Uuid
+  content       String   @db.Text
+  author        String?
+  sourceTitle   String?
+  sourceUrl     String?
+
+  vaultItem     VaultItem @relation(fields: [vaultItemId], references: [id], onDelete: Cascade)
+}
+
+
+model Link {
+  id            String   @id @default(uuid()) @db.Uuid
+  vaultItemId   String   @unique  @db.Uuid
+  url           String   @db.Text
+  title         String?
+  description   String? @db.Text
+
+  vaultItem     VaultItem  @relation(fields: [vaultItemId], references: [id], onDelete: Cascade)   
 }
