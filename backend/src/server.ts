@@ -1,11 +1,8 @@
-import dontenv from "dotenv"
-import app from "./app"
+import "dotenv/config";
+import app from "./app";
 
-dontenv.config()
+const port = Number(process.env.PORT ?? 3000);
 
-const PORT = Number(process.env.PORT) || 3000
-
-
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`)
-})
+app.listen(port, () => {
+  console.log(`Creative Vault API ouvindo em http://localhost:${port}`);
+});

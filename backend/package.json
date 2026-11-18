@@ -2,19 +2,25 @@
   "name": "creative-vault",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "build": "tsc && node -e \"require('fs').cpSync('src/generated','dist/generated',{recursive:true})\"",
     "start": "node dist/server.js",
-    "test": "vitest run",
+    "test": "node scripts/with-test-env.cjs vitest run",
     "test:watch": "vitest",
-    "db:up": "docker compose up -d postgres",
+    "db:up": "docker compose up -d db",
     "db:down": "docker compose down",
-    "db:logs": "docker compose logs -f postgres",
+    "db:logs": "docker compose logs -f db",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "test:unit": "vitest run tests/unit src",
+    "test:integration": "node scripts/with-test-env.cjs vitest run tests/integration",
+    "prisma:migrate:test": "node scripts/with-test-env.cjs prisma migrate deploy",
+    "prisma:validate": "prisma validate",
+    "seed": "tsx prisma/seed.ts",
+    "seed:test": "node scripts/with-test-env.cjs tsx prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
@@ -30,7 +36,10 @@
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^26.6.5",
+    "@types/supertest": "^6.0.2",
+    "supertest": "^7.1.0",
     "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^3.2.4"
   }
 }

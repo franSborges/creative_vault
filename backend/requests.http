@@ -1,0 +1,43 @@
+### Creative Vault — Collections (REST Client do VS Code / IntelliJ)
+@base = http://localhost:3000
+@collectionId = COLE-O-ID-AQUI
+# VaultItem "Fingersmith" criado pelo seed (IDs fixos 0000...0001 a 0000...0005)
+@bookId = 00000000-0000-4000-8000-000000000001
+
+GET {{base}}/health
+
+###
+GET {{base}}/api/v1/collections
+
+###
+POST {{base}}/api/v1/collections
+Content-Type: application/json
+
+{ "name": "Vitoriana", "description": "Romances de época", "coverUrl": "https://example.com/capa.jpg" }
+
+###
+GET {{base}}/api/v1/collections/{{collectionId}}
+
+###
+PATCH {{base}}/api/v1/collections/{{collectionId}}
+Content-Type: application/json
+
+{ "name": "Vitoriana (editada)" }
+
+###
+POST {{base}}/api/v1/collections/{{collectionId}}/items
+Content-Type: application/json
+
+{ "vaultItemId": "{{bookId}}", "coverUrl": "https://example.com/capa-alt.jpg" }
+
+### Item duplicado -> 409 DUPLICATE_RESOURCE
+POST {{base}}/api/v1/collections/{{collectionId}}/items
+Content-Type: application/json
+
+{ "vaultItemId": "{{bookId}}", "position": 5 }
+
+### :itemId = vaultItemId
+DELETE {{base}}/api/v1/collections/{{collectionId}}/items/{{bookId}}
+
+###
+DELETE {{base}}/api/v1/collections/{{collectionId}}

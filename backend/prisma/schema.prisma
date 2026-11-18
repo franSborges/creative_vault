@@ -1,11 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
@@ -14,6 +8,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
 
 enum VaultItemType {
   BOOK
@@ -23,6 +20,9 @@ enum VaultItemType {
   LINK
 }
 
+// ---------------------------------------------------------------------------
+// Identidade
+// ---------------------------------------------------------------------------
 
 model User {
   id           String   @id @default(uuid()) @db.Uuid
@@ -30,92 +30,133 @@ model User {
   email        String   @unique
   passwordHash String?
   createdAt    DateTime @default(now())
-  updateAt     DateTime @updatedAt
+  updatedAt    DateTime @updatedAt
 
   library      Library?
 }
 
-
 model Library {
-  id           String     @id @default(uuid()) @db.Uuid
-  ownerId      String     @unique  @db.Uuid
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id        String   @id @default(uuid()) @db.Uuid
+  ownerId   String   @unique @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  owner        User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  vaultItems   VaultItem[]
-
+  owner      User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  vaultItems VaultItem[]
+  collections Collection[]
 }
 
+// ---------------------------------------------------------------------------
+// Vault
+// ---------------------------------------------------------------------------
 
 model VaultItem {
-  id         String       @id @default(uuid()) @db.Uuid
-  libraryId  String       @db.Uuid
-  type       VaultItemType
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id        String        @id @default(uuid()) @db.Uuid
+  libraryId String        @db.Uuid
+  type      VaultItemType
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 
-  library    Library     @relation(fields: [libraryId], references: [id], onDelete: Cascade)
-  book       Book?
-  movie      Movie?
+  library Library @relation(fields: [libraryId], references: [id], onDelete: Cascade)
+
+  book  Book?
+  movie Movie?
+  image Image?
+  quote Quote?
+  link  Link?
+
+  collectionItems CollectionItem[]
+
+  @@index([libraryId])
 }
-
 
 model Book {
-  id               String      @id @default(uuid()) @db.Uuid
-  vaultItemId      String      @unique  @db.Uuid
-  title            String
-  author           String?
-  isbn             String? 
-  publicationYear  Int?
+  id              String  @id @default(uuid()) @db.Uuid
+  vaultItemId     String  @unique @db.Uuid
+  title           String
+  author          String?
+  isbn            String?
+  publicationYear Int?
 
-  vaultItem        VaultItem   @relation(fields: [vaultItemId], references: [id], onDelete: Cascade)     
+  vaultItem VaultItem @relation(fields: [vaultItemId], references: [id], onDelete: Cascade)
 }
-
 
 model Movie {
-  id               String    @id       @default(uuid()) @db.Uuid
-  vaultItemId      String    @unique   @db.Uuid
-  title            String
-  originalTitle    String?
-  director         String?
-  releaseYear      Int?
+  id            String  @id @default(uuid()) @db.Uuid
+  vaultItemId   String  @unique @db.Uuid
+  title         String
+  originalTitle String?
+  director      String?
+  releaseYear   Int?
 
-  vaultItem        VaultItem  @relation(fields: [vaultItemId], references: [id], onDelete: Cascade)
+  vaultItem VaultItem @relation(fields: [vaultItemId], references: [id], onDelete: Cascade)
 }
-
 
 model Image {
-  id    String   @id @default(uuid()) @db.Uuid
-  vaultItemId  String  @unique @db.Uuid
-  title        String?
-  description  String?
-  storageKey   String?
-  externalUrl  String?
-  sourceUrl    String?
+  id          String   @id @default(uuid()) @db.Uuid
+  vaultItemId String   @unique @db.Uuid
+  title       String?
+  description String?  @db.Text
+  storageKey  String?
+  externalUrl String?  @db.Text
+  sourceUrl   String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  vaultItem    VaultItem @relation(fields: [vaultItemId], references: [id], onDelete: Cascade)
+  vaultItem VaultItem @relation(fields: [vaultItemId], references: [id], onDelete: Cascade)
 }
-
 
 model Quote {
-  id            String   @id @default(uuid()) @db.Uuid
-  vaultItemId   String   @unique  @db.Uuid
-  content       String   @db.Text
-  author        String?
-  sourceTitle   String?
-  sourceUrl     String?
+  id          String  @id @default(uuid()) @db.Uuid
+  vaultItemId String  @unique @db.Uuid
+  content     String  @db.Text
+  author      String?
+  sourceTitle String?
+  sourceUrl   String? @db.Text
 
-  vaultItem     VaultItem @relation(fields: [vaultItemId], references: [id], onDelete: Cascade)
+  vaultItem VaultItem @relation(fields: [vaultItemId], references: [id], onDelete: Cascade)
 }
 
-
 model Link {
-  id            String   @id @default(uuid()) @db.Uuid
-  vaultItemId   String   @unique  @db.Uuid
-  url           String   @db.Text
-  title         String?
-  description   String? @db.Text
+  id          String  @id @default(uuid()) @db.Uuid
+  vaultItemId String  @unique @db.Uuid
+  url         String  @db.Text
+  title       String?
+  description String? @db.Text
 
-  vaultItem     VaultItem  @relation(fields: [vaultItemId], references: [id], onDelete: Cascade)   
+  vaultItem VaultItem @relation(fields: [vaultItemId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// Collections
+// ---------------------------------------------------------------------------
+
+model Collection {
+  id          String   @id @default(uuid()) @db.Uuid
+  libraryId   String   @db.Uuid
+  name        String
+  description String?  @db.Text
+  coverUrl    String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  library Library        @relation(fields: [libraryId], references: [id], onDelete: Cascade)
+  items   CollectionItem[]
+
+  @@index([libraryId])
+}
+
+model CollectionItem {
+  id           String   @id @default(uuid()) @db.Uuid
+  collectionId String   @db.Uuid
+  vaultItemId  String   @db.Uuid
+  coverUrl     String?  @db.Text
+  position     Int?
+  createdAt    DateTime @default(now())
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  vaultItem  VaultItem  @relation(fields: [vaultItemId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, vaultItemId])
+  @@index([vaultItemId])
 }
