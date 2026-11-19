@@ -1,4 +1,3 @@
-
 services:
   db:
     image: postgres:16-alpine
@@ -13,6 +12,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U  -d"]
       interval: 5s
       timeout: 5s
       retries: 5

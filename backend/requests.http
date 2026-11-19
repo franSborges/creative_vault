@@ -1,6 +1,6 @@
-### Creative Vault — Collections (REST Client do VS Code / IntelliJ)
+### Creative Vault — Collections 
 @base = http://localhost:3000
-@collectionId = COLE-O-ID-AQUI
+@collectionId = e73979b6-846f-4a97-8ed3-b2860ae86d9f
 # VaultItem "Fingersmith" criado pelo seed (IDs fixos 0000...0001 a 0000...0005)
 @bookId = 00000000-0000-4000-8000-000000000001
 
